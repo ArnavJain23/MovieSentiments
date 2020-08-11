@@ -1,3 +1,5 @@
+from timeit import default_timer as timer
+
 import grequests
 import pandas as pd
 import requests
@@ -90,10 +92,11 @@ def get_responses(urls, headers: dict = None, retry=False):
     print("Fetching responses...", end="  ->  ")
     reqs = (grequests.get(url, headers=headers) for url in urls)
     handler = lambda request, exception: print(f"Request failed:\n{exception}")
+    start_time = timer()
     responses = grequests.map(reqs, size=10, exception_handler=handler)
-    time = 0
+    end_time = timer()
+    tot_time = int(end_time - start_time)
     for response in responses:
-        time += int(response.elapsed.total_seconds())
         if response.status_code == 403:
             if not retry:
                 print(
@@ -109,7 +112,7 @@ def get_responses(urls, headers: dict = None, retry=False):
     if not responses:
         raise AttributeError("No responses were recieved")
     else:
-        print(f"Recieved responses succesfully in {time} seconds")
+        print(f"Recieved responses succesfully in {tot_time} seconds")
     return responses
 
 
@@ -128,7 +131,12 @@ def generate_df(responses) -> pd.DataFrame:
     review_scores = []
     print("Parsing user reviews...")
     for response in responses:
-        movie_data = RottenTomatoesScraper(response.content)
+        try:
+            movie_data = RottenTomatoesScraper(response.content)
+        except AttributeError:
+            print(f"  No reviews found for url: {response.url}")
+            response.close()
+            continue
         titles.extend(movie_data.titles)
         review_text.extend(movie_data.review_text)
         review_scores.extend(movie_data.review_scores)
@@ -139,8 +147,9 @@ def generate_df(responses) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    movie_tags_2019 = get_top_100_movie_tags(year=2017)
-    urls = get_user_review_urls_from_tags(movie_tags_2019)
+    year = int(input("Year of charts to scrape: "))
+    movie_tags = get_top_100_movie_tags(year=year)
+    urls = get_user_review_urls_from_tags(movie_tags)
     responses = get_responses(urls)
     df: pd.DataFrame = generate_df(responses)
-    df.to_csv("movie_reviews.csv")
+    df.to_csv(f"movie_reviews{year}.csv")
