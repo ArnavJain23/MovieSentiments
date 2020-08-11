@@ -24,7 +24,7 @@ firefox_header = {
 RT_url = "https://www.rottentomatoes.com"
 
 
-def get_top_100_movie_tags(year=2019, headers: dict = None):
+def get_top_100_movie_tags(year=2017, headers: dict = None):
     """Get HTML tags from top 100 movies page on Rotten Tomatoes.
 
     Args:
@@ -139,7 +139,7 @@ def generate_df(responses) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    movie_tags_2019 = get_top_100_movie_tags(year=2019)
+    movie_tags_2019 = get_top_100_movie_tags(year=2017)
     urls = get_user_review_urls_from_tags(movie_tags_2019)
     responses = get_responses(urls)
     df: pd.DataFrame = generate_df(responses)

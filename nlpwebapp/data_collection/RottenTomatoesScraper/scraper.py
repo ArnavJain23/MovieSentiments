@@ -80,6 +80,7 @@ class RottenTomatoesScraper:
 
         if not star_displays:
             raise AttributeError("No star-display tags were found in the content.")
+            
 
         review_scores = [
             self.calculate_score(star_display) for star_display in star_displays
