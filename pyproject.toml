@@ -12,6 +12,9 @@ lxml = "^4.5.2"
 html5lib = "^1.1"
 pandas = "^1.1.0"
 grequests = "^0.6.0"
+jupyter = "^1.0.0"
+scikit-learn = "^0.23.2"
+spacy = "^2.3.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
